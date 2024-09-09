@@ -8,7 +8,7 @@
   "dev": "nodemon src/index.js"
   },
   "keywords": [],
-  "author": "guilherme",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
