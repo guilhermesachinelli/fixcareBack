@@ -13,7 +13,7 @@ CREATE TABLE machine (
     numero_de_patrimonio VARCHAR(255) NOT NULL,
     numero_de_serie VARCHAR(255) NOT NULL UNIQUE,
     data_de_aquisicao DATE NOT NULL,
-    data_de_recomendacao_de_manutencao DATE NOT NULL,
+    recomendacao_de_manutencao VARCHAR(255) NOT NULL,
     oleo_lubrificante VARCHAR(255) NOT NULL,
     status VARCHAR(255) NOT NULL
 );
@@ -48,5 +48,10 @@ CREATE TABLE maintenance (
 CREATE TABLE lubrication (
     id SERIAL PRIMARY KEY,
     numero_de_serieID INTEGER NOT NULL,
+    nome_do_responsavel VARCHAR(255) NOT NULL,
+
     
 );
+CREATE TABLE imagens (
+
+)
