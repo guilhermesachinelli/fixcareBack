@@ -1,17 +1,20 @@
 const e = require('express');
 const pool = require('../config/dbConfig');
-async function getMaquinas(req, res) {
+async function getMachines  (req, res) {
     try {
-        const response = await pool.query('SELECT * FROM maquinas');
-        res.status(200).json(response.rows);
+        // Lógica para obter a lista de máquinas
+        const result = await pool.query('SELECT * FROM machine');
+        res.status(200).json(result.rows);
     } catch (error) {
-        res.status(500).json(error);
+        console.error(error)
+        res.status(500).send('Erro ao obter a lista de máquinas ', error);
     }
 }
-async function getMaquina(req, res) {
+async function getMachine(req, res) {
+    const id = req.params.id;
+    const response = await pool.query('SELECT * FROM machine WHERE id = $1', [id]);
+    console.log(response.rows);
     try {
-        const id = req.params.id;
-        const response = await pool.query('SELECT * FROM maquinas WHERE id = $1', [id]);
         if (response.rows == 0) {
             return res.status(404).json({ message: "Maquina no encontrada" });
         }
@@ -23,41 +26,141 @@ async function getMaquina(req, res) {
     }
 }
 async function createMachine(req, res) {
-    const {categoria,marca,modelo,numero_de_patrimonio,numero_de_serie,data_aquisicao, recomendacao_de_manutencao,oleo_lubrificante,status} = req.body;
-    const query = 'INSERT INTO maquinas (categoria,marca,modelo,numero_de_patrimonio,numero_de_serie,data_aquisicao, recomendacao_de_manutencao,oleo_lubrificante,status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)';
-    const values = [categoria,marca,modelo,numero_de_patrimonio,numero_de_serie,data_aquisicao, recomendacao_de_manutencao,oleo_lubrificante,status];
-    try{
+    const {
+        categoria,
+        marca,
+        modelo,
+        numero_de_patrimonio,
+        numero_de_serie,
+        numero_do_torno,
+        data_de_aquisicao,
+        oleo_lubrificante,
+        pontos_de_lubrificacao,
+        frequencia_de_lubrificacao,
+        quantidade_de_oleo,
+        data_da_ultima_troca_de_oleo,
+        imagem
+    } = req.body;
+
+    const query = `
+        INSERT INTO machine (
+            categoria,
+            marca,
+            modelo,
+            numero_de_patrimonio,
+            numero_de_serie,
+            numero_do_torno,
+            data_de_aquisicao,
+            oleo_lubrificante,
+            pontos_de_lubrificacao,
+            frequencia_de_lubrificacao,
+            quantidade_de_oleo,
+            data_da_ultima_troca_de_oleo,
+            imagem
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        RETURNING *`;
+
+    const values = [
+        categoria,
+        marca,
+        modelo,
+        numero_de_patrimonio,
+        numero_de_serie,
+        numero_do_torno,
+        data_de_aquisicao,
+        oleo_lubrificante,
+        pontos_de_lubrificacao,
+        frequencia_de_lubrificacao,
+        quantidade_de_oleo,
+        data_da_ultima_troca_de_oleo,
+        imagem
+    ];
+
+    try {
         const response = await pool.query(query, values);
         res.status(201).json(response.rows[0]);
-    }catch(error){
-        res.status(500).json(error);
-    }
-}
-async function deleteMachine() {
-    try {
-        const id = req.params.id;
-        const response = await pool.query('DELETE FROM maquinas WHERE id = $1', [id]);
-        res.status(200).json(response.rows);
     } catch (error) {
         res.status(500).json(error);
     }
 }
-async function updateMachine() {
+async function deleteMachine(req, res) {
     const id = req.params.id;
-    const {categoria,marca,modelo,numero_de_patrimonio,numero_de_serie,data_aquisicao, recomendacao_de_manutencao,oleo_lubrificante,status} = req.body;
-    const query = 'UPDATE maquinas SET categoria = $1, marca = $2, modelo = $3, numero_de_patrimonio = $4, numero_de_serie = $5, data_aquisicao = $6, recomendacao_de_manutencao = $7, oleo_lubrificante = $8, status = $9 WHERE id = $10';
-    const values = [categoria,marca,modelo,numero_de_patrimonio,numero_de_serie,data_aquisicao, recomendacao_de_manutencao,oleo_lubrificante,status,id];
-    try{
-        const result = await pool.query(query, values);
-        if(result.rowCount == 0){
-            return res.status(404).json({message: "Maquina não encontrada"});
-        }
-        else{
-            return res.status(200).json({message: "Maquina atualizada com sucesso"});
-        }
-    }catch(error){
-        res.status(500).json(error);
-    }
 
+    try {
+        const response = await pool.query('DELETE FROM machine WHERE id = $1', [id]);
+        console.log(response); // Adicionando console.log para depuração
+
+        if (response.rowCount === 0) {
+            return res.status(404).json({ message: "Máquina não encontrada" });
+        } else {
+            return res.status(200).json({ message: "Máquina deletada com sucesso" });
+        }
+    } catch (error) {
+        console.error(error); // Adicionando console.error para depuração
+        res.status(500).json({ error: "Erro ao deletar a máquina" });
+    }
 }
-module.exports = { getMaquinas, getMaquina,createMachine,deleteMachine,updateMachine };  
+async function updateMachine(req, res) {
+    const {
+        categoria,
+        marca,
+        modelo,
+        numero_de_patrimonio,
+        numero_de_serie,
+        numero_do_torno,
+        data_de_aquisicao,
+        oleo_lubrificante,
+        pontos_de_lubrificacao,
+        frequencia_de_lubrificacao,
+        quantidade_de_oleo,
+        data_da_ultima_troca_de_oleo,
+        imagem
+    } = req.body;
+    const id = req.params.id;
+    const query = `
+        UPDATE machine 
+        SET categoria = $1, 
+            marca = $2, 
+            modelo = $3, 
+            numero_de_patrimonio = $4, 
+            numero_de_serie = $5, 
+            numero_do_torno = $6, 
+            data_de_aquisicao = $7, 
+            oleo_lubrificante = $8, 
+            pontos_de_lubrificacao = $9, 
+            frequencia_de_lubrificacao = $10, 
+            quantidade_de_oleo = $11, 
+            data_da_ultima_troca_de_oleo = $12, 
+            imagem = $13 
+        WHERE id = $14`;
+
+    const values = [
+        categoria,
+        marca,
+        modelo,
+        numero_de_patrimonio,
+        numero_de_serie,
+        numero_do_torno,
+        data_de_aquisicao,
+        oleo_lubrificante,
+        pontos_de_lubrificacao,
+        frequencia_de_lubrificacao,
+        quantidade_de_oleo,
+        data_da_ultima_troca_de_oleo,
+        imagem,
+        id
+    ];
+
+    try {
+        const result = await pool.query(query, values);
+        if (result.rowCount == 0) {
+            return res.status(404).json({ message: "Máquina não encontrada" });
+        } else {
+            return res.status(200).json({ message: "Máquina atualizada com sucesso" });
+        }
+    } catch (error) {
+        console.error(error); 
+        res.status(500).json({ error: "Erro ao atualizar a máquina" });
+    }
+}
+module.exports = { getMachines,getMachine,createMachine,deleteMachine,updateMachine };  
