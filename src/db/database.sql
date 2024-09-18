@@ -46,3 +46,4 @@ CREATE TABLE maintenance (
     status BOOLEAN NOT NULL,
     FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
 );
+
