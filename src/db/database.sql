@@ -24,7 +24,6 @@ CREATE TABLE machine (
 -- Criação da tabela de administradores
 CREATE TABLE adm (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL
 );
@@ -50,4 +49,3 @@ CREATE TABLE maintenance (
     status BOOLEAN NOT NULL,
     FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
 );
-
