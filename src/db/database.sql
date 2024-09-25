@@ -51,6 +51,5 @@ CREATE TABLE lubrificacao(
     pontos_de_lubrificacao JSONB NOT NULL,
     frequencia_de_lubrificacao JSONB NOT NULL,
     quantidade_de_oleo JSONB NOT NULL,
-    imagem JSONB
     FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
 );
