@@ -39,7 +39,6 @@ async function createMaintenance(req, res) {
         frequencia_de_lubrificacao,
         quantidade_de_oleo,
     } = req.body;
-    c
     const queryManutencao = `
         INSERT INTO maintenance (
             numero_de_serieID,
@@ -73,7 +72,7 @@ async function createMaintenance(req, res) {
         quantidade_de_oleo
     ];
     try {
-        if (!numero_de_serieID || !nome_do_responsavel || !tipo_de_manutencao || !data_da_manutencao || !descricao ||  !status || !oleo_lubrificante || !pontos_de_lubrificacao || !frequencia_de_lubrificacao || !quantidade_de_oleo) {
+        if (!numero_de_serieID || !nome_do_responsavel || !tipo_de_manutencao || !data_da_manutencao || !descricao || !status || !oleo_lubrificante || !pontos_de_lubrificacao || !frequencia_de_lubrificacao || !quantidade_de_oleo) {
             return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
         }
         if (!numero_de_serieID) {
@@ -122,4 +121,87 @@ async function createMaintenance(req, res) {
         res.status(500).send('Erro ao criar manutenção ', error);
     }
 }
-module.exports = { getMaintenances , getMaintenance , createMaintenance };
+async function updateMaintenance(req, res) {
+    const id = req.params.id;
+    const {
+        numero_de_serieID,
+        nome_do_responsavel,
+        tipo_de_manutencao,
+        data_da_manutencao,
+        descricao,
+        status,
+        oleo_lubrificante,
+        pontos_de_lubrificacao,
+        frequencia_de_lubrificacao,
+        quantidade_de_oleo,
+    } = req.body;
+
+    const queryManutencao = `
+        UPDATE maintenance
+        SET
+            numero_de_serieID = $1,
+            nome_do_responsavel = $2,
+            tipo_de_manutencao = $3,
+            data_da_manutencao = $4,
+            descricao = $5,
+            status = $6
+        WHERE id = $7
+        RETURNING *`;
+
+    const queryLubrificacao = `
+        UPDATE lubrificacao
+        SET
+            oleo_lubrificante = $1,
+            pontos_de_lubrificacao = $2,
+            frequencia_de_lubrificacao = $3,
+            quantidade_de_oleo = $4
+        WHERE numero_de_serieID = $5
+        RETURNING *`;
+
+    const valuesManutencao = [
+        numero_de_serieID,
+        nome_do_responsavel,
+        tipo_de_manutencao,
+        data_da_manutencao,
+        descricao,
+        status,
+        id
+    ];
+
+    const valuesLubrificacao = [
+        oleo_lubrificante,
+        pontos_de_lubrificacao,
+        frequencia_de_lubrificacao,
+        quantidade_de_oleo,
+        numero_de_serieID
+    ];
+
+    try {
+        // Verificações individuais para cada campo
+        if (!numero_de_serieID || !nome_do_responsavel || !tipo_de_manutencao || !data_da_manutencao || !descricao || !status || !oleo_lubrificante || !pontos_de_lubrificacao || !frequencia_de_lubrificacao || !quantidade_de_oleo) {
+            return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+        }
+        if (frequencia_de_lubrificacao < 0) {
+            return res.status(400).json({ message: 'A frequência de lubrificação não pode ser negativa' });
+        }
+        if (quantidade_de_oleo < 0) {
+            return res.status(400).json({ message: 'A quantidade de óleo não pode ser negativa' });
+        }
+        else {
+            // Atualizar dados na tabela maintenance
+            const responseManutencao = await pool.query(queryManutencao, valuesManutencao);
+
+            // Atualizar dados na tabela lubrificacao
+            const responseLubrificacao = await pool.query(queryLubrificacao, valuesLubrificacao);
+
+            return res.status(200).json({
+                manutencao: responseManutencao.rows[0],
+                lubrificacao: responseLubrificacao.rows[0]
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Erro ao atualizar manutenção: ' + error.message);
+    }
+}
+module.exports = { getMaintenances, getMaintenance, createMaintenance, updateMaintenance};
