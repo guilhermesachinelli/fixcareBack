@@ -25,6 +25,20 @@ async function getMachine(req, res) {
         res.status(500).json(error);
     }
 }
+async function getbyNumeroDeSerieMachine(req, res) {
+    const numeroDeSerie = req.params.numeroDeSerie;
+    const response = await pool.query('SELECT * FROM machine WHERE numero_de_serie = $1', [numeroDeSerie]);
+    console.log(response.rows);
+    try {
+        if (response.rows.length === 0) {
+            return res.status(404).json({ message: "Máquina não encontrada" });
+        } else {
+            return res.status(200).json(response.rows);
+        }
+    } catch (error) {
+        res.status(500).json(error);
+    }
+}
 async function createMachine(req, res) {
     const {
         categoria,
@@ -34,12 +48,7 @@ async function createMachine(req, res) {
         numero_de_serie,
         numero_do_torno,
         data_de_aquisicao,
-        oleo_lubrificante,
-        pontos_de_lubrificacao,
-        frequencia_de_lubrificacao,
-        quantidade_de_oleo,
         data_da_ultima_troca_de_oleo,
-        imagem
     } = req.body;
 
     const query = `
@@ -51,13 +60,8 @@ async function createMachine(req, res) {
             numero_de_serie,
             numero_do_torno,
             data_de_aquisicao,
-            oleo_lubrificante,
-            pontos_de_lubrificacao,
-            frequencia_de_lubrificacao,
-            quantidade_de_oleo,
             data_da_ultima_troca_de_oleo,
-            imagem
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *`;
 
     const values = [
@@ -68,12 +72,7 @@ async function createMachine(req, res) {
         numero_de_serie,
         numero_do_torno,
         data_de_aquisicao,
-        oleo_lubrificante,
-        pontos_de_lubrificacao,
-        frequencia_de_lubrificacao,
-        quantidade_de_oleo,
         data_da_ultima_troca_de_oleo,
-        imagem
     ];
 
     try {
@@ -101,6 +100,7 @@ async function deleteMachine(req, res) {
     }
 }
 async function updateMachine(req, res) {
+    const id = req.params.id;
     const {
         categoria,
         marca,
@@ -109,14 +109,8 @@ async function updateMachine(req, res) {
         numero_de_serie,
         numero_do_torno,
         data_de_aquisicao,
-        oleo_lubrificante,
-        pontos_de_lubrificacao,
-        frequencia_de_lubrificacao,
-        quantidade_de_oleo,
         data_da_ultima_troca_de_oleo,
-        imagem
     } = req.body;
-    const id = req.params.id;
     const query = `
         UPDATE machine 
         SET categoria = $1, 
@@ -126,13 +120,8 @@ async function updateMachine(req, res) {
             numero_de_serie = $5, 
             numero_do_torno = $6, 
             data_de_aquisicao = $7, 
-            oleo_lubrificante = $8, 
-            pontos_de_lubrificacao = $9, 
-            frequencia_de_lubrificacao = $10, 
-            quantidade_de_oleo = $11, 
             data_da_ultima_troca_de_oleo = $12, 
-            imagem = $13 
-        WHERE id = $14`;
+        WHERE id = $13`;
 
     const values = [
         categoria,
@@ -142,12 +131,7 @@ async function updateMachine(req, res) {
         numero_de_serie,
         numero_do_torno,
         data_de_aquisicao,
-        oleo_lubrificante,
-        pontos_de_lubrificacao,
-        frequencia_de_lubrificacao,
-        quantidade_de_oleo,
         data_da_ultima_troca_de_oleo,
-        imagem,
         id
     ];
 
@@ -163,4 +147,4 @@ async function updateMachine(req, res) {
         res.status(500).json({ error: "Erro ao atualizar a máquina" });
     }
 }
-module.exports = { getMachines,getMachine,createMachine,deleteMachine,updateMachine };  
+module.exports = { getMachines,getMachine,getbyNumeroDeSerieMachine,createMachine,deleteMachine,updateMachine };  

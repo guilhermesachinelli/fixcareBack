@@ -14,12 +14,7 @@ CREATE TABLE machine (
     numero_de_serie VARCHAR(255) NOT NULL UNIQUE,
     numero_do_torno INTEGER NOT NULL UNIQUE,
     data_de_aquisicao DATE NOT NULL,
-    oleo_lubrificante JSONB NOT NULL,
-    pontos_de_lubrificacao JSONB NOT NULL,
-    frequencia_de_lubrificacao JSONB NOT NULL,
-    quantidade_de_oleo JSONB NOT NULL,
-    data_da_ultima_troca_de_oleo DATE NOT NULL,
-    imagem JSONB
+    data_da_ultima_troca_de_oleo DATE NOT NULL 
 );
 -- Criação da tabela de administradores
 CREATE TABLE adm (
@@ -46,6 +41,16 @@ CREATE TABLE maintenance (
     tipo_de_manutencao VARCHAR(100) NOT NULL,
     descricao VARCHAR(900) NOT NULL,
     data_de_manutencao DATE NOT NULL,
-    status BOOLEAN NOT NULL,
+    status VARCHAR(100) NOT NULL,
+    FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
+);
+CREATE TABLE lubrificacao(
+    id SERIAL PRIMARY KEY,
+    numero_de_serieID INTEGER NOT NULL,
+    oleo_lubrificante JSONB NOT NULL,
+    pontos_de_lubrificacao JSONB NOT NULL,
+    frequencia_de_lubrificacao JSONB NOT NULL,
+    quantidade_de_oleo JSONB NOT NULL,
+    imagem JSONB
     FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
 );
