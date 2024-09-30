@@ -22,10 +22,25 @@ CREATE TABLE adm (
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL
 );
+CREATE TABLE funcionario (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    nif INTEGER NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+);
+CREATE TABLE aluno (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    turma VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+
+);
 -- Criação da tabela de requisição de manutenção
 CREATE TABLE requestmaintenance (
     id SERIAL PRIMARY KEY,
-    numero_de_serieID INTEGER NOT NULL,
+    numero_de_serieID VARCHAR(100) NOT NULL,
     nome VARCHAR(255) NOT NULL,
     causa_do_problema VARCHAR(255) NOT NULL,
     descricao VARCHAR(255),
@@ -36,7 +51,7 @@ CREATE TABLE requestmaintenance (
 -- Criação da tabela de manutenção
 CREATE TABLE maintenance (
     id SERIAL PRIMARY KEY,
-    numero_de_serieID INTEGER NOT NULL,
+    numero_de_serieID VARCHAR(255) NOT NULL,
     nome_do_responsavel VARCHAR(255) NOT NULL,
     tipo_de_manutencao VARCHAR(100) NOT NULL,
     descricao VARCHAR(900) NOT NULL,
@@ -46,7 +61,7 @@ CREATE TABLE maintenance (
 );
 CREATE TABLE lubrificacao(
     id SERIAL PRIMARY KEY,
-    numero_de_serieID INTEGER NOT NULL,
+    numero_de_serieID VARCHAR(255) NOT NULL,
     oleo_lubrificante JSONB NOT NULL,
     pontos_de_lubrificacao JSONB NOT NULL,
     frequencia_de_lubrificacao JSONB NOT NULL,

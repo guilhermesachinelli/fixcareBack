@@ -11,10 +11,18 @@ async function getAdmins(req, res) {
 }
 async function compareAdmin(req, res) {
     const { email, senha } = req.body;
-    if (email === "" || senha === "") {
-        return res.status(400).json({ message: "Email e senha são obrigatórios" });
+    const errors = [];
+    const errorCount = 0;
+    if (!email) {
+        errors.push({ message: "Email é obrigatório" });
     }
-
+    if (!senha) {
+        errors.push({ message: "Senha é obrigatório" });
+    }
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
+    }
+    
     try {
         const response = await pool.query('SELECT * FROM adm WHERE email = $1 AND senha = $2', [email, senha]);
 
