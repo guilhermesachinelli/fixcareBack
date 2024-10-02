@@ -31,11 +31,8 @@ CREATE TABLE funcionario (
 );
 CREATE TABLE aluno (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    turma VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL,
-
+    senha VARCHAR(255) NOT NULL
 );
 -- Criação da tabela de requisição de manutenção
 CREATE TABLE requestmaintenance (
@@ -68,3 +65,7 @@ CREATE TABLE lubrificacao(
     quantidade_de_oleo JSONB NOT NULL,
     FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
 );
+
+INSERT INTO adm (email, senha) VALUES ('admin', 'admin');
+
+INSERT INTO aluno (email, senha) VALUES ('aluno', 'aluno');

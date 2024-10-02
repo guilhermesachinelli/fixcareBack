@@ -13,11 +13,14 @@ async function compareAdmin(req, res) {
     const { email, senha } = req.body;
     const errors = [];
     const errorCount = 0;
+    console.log('Dados recebidos:', req.body);
     if (!email) {
         errors.push({ message: "Email é obrigatório" });
+        errorCount++;
     }
     if (!senha) {
         errors.push({ message: "Senha é obrigatório" });
+        errorCount++;
     }
     if (errors.length > 0) {
         return res.status(400).json({ errors });
@@ -25,7 +28,6 @@ async function compareAdmin(req, res) {
     
     try {
         const response = await pool.query('SELECT * FROM adm WHERE email = $1 AND senha = $2', [email, senha]);
-
         if (response.rows.length === 0) {
             return res.status(404).json({ message: "Email ou senha incorretos" });
         } else {
