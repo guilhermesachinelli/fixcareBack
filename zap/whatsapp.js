@@ -42,8 +42,7 @@ client.on("qr", (qr) => {
 client.on("ready", async () => {
     console.log("\nWhatsApp está pronto!\n");
     console.log("Grupos disponíveis:");
-
-    // Listar grupos disponíveis
+        // Listar grupos disponíveis
     try {
         const chats = await client.getChats();
         chats.forEach((chat) => {
@@ -54,13 +53,11 @@ client.on("ready", async () => {
     } catch (err) {
         console.error("Erro ao obter chats:", err);
     }
-
     // Exemplo de uso
     const groupNameOrId = "120363327750555481@g.us"; // Nome do grupo ou ID
-    // const groupNameOrId = "Neca";
+    // const groupNameOrId = "";
     const message =
         "Mensagem TESTE no grupo para projeto Veteranos (npm i whatsapp-web.js)";
-
     await sendMessage(groupNameOrId, message);
 });
 
