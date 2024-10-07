@@ -14,7 +14,6 @@ CREATE TABLE machine (
     numero_de_serie VARCHAR(255) NOT NULL UNIQUE,
     numero_do_torno INTEGER NOT NULL UNIQUE,
     data_de_aquisicao DATE NOT NULL,
-    data_da_ultima_troca_de_oleo DATE NOT NULL 
 );
 -- Criação da tabela de administradores
 CREATE TABLE adm (
@@ -22,6 +21,7 @@ CREATE TABLE adm (
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL
 );
+
 CREATE TABLE funcionario (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
@@ -48,24 +48,33 @@ CREATE TABLE requestmaintenance (
 -- Criação da tabela de manutenção
 CREATE TABLE maintenance (
     id SERIAL PRIMARY KEY,
-    numero_de_serieID VARCHAR(255) NOT NULL,
+    numero_de_patrimonioID VARCHAR(255) NOT NULL,
     nome_do_responsavel VARCHAR(255) NOT NULL,
     tipo_de_manutencao VARCHAR(100) NOT NULL,
     descricao VARCHAR(900) NOT NULL,
     data_de_manutencao DATE NOT NULL,
     status VARCHAR(100) NOT NULL,
-    FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
-);
-CREATE TABLE lubrificacao(
-    id SERIAL PRIMARY KEY,
-    numero_de_serieID VARCHAR(255) NOT NULL,
-    oleo_lubrificante JSONB NOT NULL,
-    pontos_de_lubrificacao JSONB NOT NULL,
-    frequencia_de_lubrificacao JSONB NOT NULL,
-    quantidade_de_oleo JSONB NOT NULL,
-    FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
+    FOREIGN KEY (numero_de_patrimonioID) REFERENCES machine(numero_de_patrimonio)
 );
 
 INSERT INTO adm (email, senha) VALUES ('admin', 'admin');
 
 INSERT INTO aluno (email, senha) VALUES ('aluno', 'aluno');
+
+INSERT INTO machine (
+    numero_de_patrimonio,
+    categoria,
+    marca,
+    modelo,
+    numero_de_serie,
+    numero_do_torno,
+    data_de_aquisicao
+) VALUES (
+    12345, 
+    'Categoria Exemplo', 
+    'Marca Exemplo',
+    'Modelo Exemplo', 
+    '123456789', 
+    1, 
+    '2023-10-01' 
+);

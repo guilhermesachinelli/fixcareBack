@@ -24,8 +24,9 @@ async function getMachines(req, res) {
         // Lógica para obter a lista de máquinas
         const result = await pool.query('SELECT * FROM machine');
         const machines = result.rows.map(machine => {
-            machine.data_de_aquisicao = formatarDataParaBrasileiro(machine.data_de_aquisicao);
-            machine.data_da_ultima_troca_de_oleo = formatarDataParaBrasileiro(machine.data_da_ultima_troca_de_oleo);
+            if (machine.data_de_aquisicao) {
+                machine.data_de_aquisicao = formatarDataParaBrasileiro(machine.data_de_aquisicao);
+            }
             return machine;
         });
         res.status(200).json(machines);
@@ -44,7 +45,6 @@ async function getMachine(req, res) {
         } else {
             const machine = response.rows[0];
             machine.data_de_aquisicao = formatarDataParaBrasileiro(machine.data_de_aquisicao);
-            machine.data_da_ultima_troca_de_oleo = formatarDataParaBrasileiro(machine.data_da_ultima_troca_de_oleo);
             return res.status(200).json(machine);
         }
     } catch (error) {
@@ -52,20 +52,28 @@ async function getMachine(req, res) {
         res.status(500).json({ message: 'Erro ao obter a máquina', error: error.message });
     }
 }
-async function getbyNumeroDeSerieMachine(req, res) {
-    const numeroDeSerie = req.params.numeroDeSerie;
-    const response = await pool.query('SELECT * FROM machine WHERE numero_de_serie = $1', [numeroDeSerie]);
-    console.log(response.rows);
+async function getbyNumeroDePatrimonioMachine(req, res) {
+    const numeroDePatrimonio = req.params.numeroDePatrimonio;
     try {
+        const response = await pool.query('SELECT * FROM machine WHERE numero_de_patrimonio = $1', [numeroDePatrimonio]);
+        console.log(response.rows);
         if (response.rows.length === 0) {
             return res.status(404).json({ message: "Máquina não encontrada" });
         } else {
-            return res.status(200).json(response.rows);
+            const machines = response.rows.map(machine => {
+                if (machine.data_de_aquisicao) {
+                    machine.data_de_aquisicao = formatarDataParaBrasileiro(machine.data_de_aquisicao);
+                }
+                return machine;
+            });
+            return res.status(200).json(machines);
         }
     } catch (error) {
-        res.status(500).json(error);
+        console.error('Erro ao obter a máquina:', error);
+        res.status(500).json({ message: 'Erro ao obter a máquina', error: error.message });
     }
 }
+
 async function createMachine(req, res) {
     const {
         categoria,
@@ -75,7 +83,6 @@ async function createMachine(req, res) {
         numero_de_serie,
         numero_do_torno,
         data_de_aquisicao,
-        data_da_ultima_troca_de_oleo,
     } = req.body;
 
     const query = `
@@ -86,9 +93,8 @@ async function createMachine(req, res) {
             numero_de_patrimonio,
             numero_de_serie,
             numero_do_torno,
-            data_de_aquisicao,
-            data_da_ultima_troca_de_oleo
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            data_de_aquisicao
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *`;
 
     const values = [
@@ -99,10 +105,9 @@ async function createMachine(req, res) {
         numero_de_serie,
         numero_do_torno,
         data_de_aquisicao,
-        data_da_ultima_troca_de_oleo,
     ];
     const errors = [];
-    const countERROR = 0;
+    let countERROR = 0;
 
     try {
         if (categoria === undefined || categoria === '') {
@@ -133,10 +138,6 @@ async function createMachine(req, res) {
             errors.push('data_de_aquisicao');
             countERROR++;
         }
-        if (data_da_ultima_troca_de_oleo === undefined || data_da_ultima_troca_de_oleo === '') {
-            errors.push('data_da_ultima_troca_de_oleo');
-            countERROR++;
-        }
         if (errors.length > 0) {
             return res.status(400).json({ message: `Campos obrigatórios: ${errors.join(', ')}` });
         }
@@ -144,7 +145,6 @@ async function createMachine(req, res) {
         const result = await pool.query(query, values);
         const machine = result.rows[0];
         machine.data_de_aquisicao = formatarDataParaBrasileiro(machine.data_de_aquisicao);
-        machine.data_da_ultima_troca_de_oleo = formatarDataParaBrasileiro(machine.data_da_ultima_troca_de_oleo);
         console.log(machine); // Adicionando console.log para depuração
         return res.status(201).json(machine);
     } catch (error) {
@@ -180,9 +180,8 @@ async function updateMachine(req, res) {
         numero_de_serie,
         numero_do_torno,
         data_de_aquisicao,
-        data_da_ultima_troca_de_oleo,
     } = req.body;
-    console.log('Dados recebidos:', req.body);
+
     const query = `
         UPDATE machine 
         SET categoria = $1, 
@@ -191,9 +190,8 @@ async function updateMachine(req, res) {
             numero_de_patrimonio = $4, 
             numero_de_serie = $5, 
             numero_do_torno = $6, 
-            data_de_aquisicao = $7, 
-            data_da_ultima_troca_de_oleo = $8 
-        WHERE id = $9`;
+            data_de_aquisicao = $7
+        WHERE id = $8`;
 
     const values = [
         categoria,
@@ -203,7 +201,6 @@ async function updateMachine(req, res) {
         numero_de_serie,
         numero_do_torno,
         data_de_aquisicao,
-        data_da_ultima_troca_de_oleo,
         id
     ];
 
@@ -217,7 +214,6 @@ async function updateMachine(req, res) {
             const selectResult = await pool.query(selectQuery, [id]);
             const updatedMachine = selectResult.rows[0];
             updatedMachine.data_de_aquisicao = formatarDataParaBrasileiro(updatedMachine.data_de_aquisicao);
-            updatedMachine.data_da_ultima_troca_de_oleo = formatarDataParaBrasileiro(updatedMachine.data_da_ultima_troca_de_oleo);
             return res.status(200).json({ message: "Máquina atualizada com sucesso", machine: updatedMachine });
         }
     } catch (error) {
@@ -225,4 +221,4 @@ async function updateMachine(req, res) {
         res.status(500).json({ error: "Erro ao atualizar a máquina" });
     }
 }
-module.exports = { getMachines,getMachine,getbyNumeroDeSerieMachine,createMachine,deleteMachine,updateMachine };  
+module.exports = { getMachines,getMachine,getbyNumeroDePatrimonioMachine,createMachine,deleteMachine,updateMachine };  
