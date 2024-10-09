@@ -1,24 +1,26 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const cron = require('node-cron');
-const pool = require('./db'); // Certifique-se de que o pool de conexão está configurado corretamente
+//const pool = require('./config/dbConfig.js'); // Certifique-se de que o pool de conexão está configurado corretamente
 
 const client = new Client({
     authStrategy: new LocalAuth(),
 });
 
 client.on('qr', (qr) => {
+    console.log('Escaneie o QR code abaixo para autenticar no WhatsApp:');
     qrcode.generate(qr, { small: true });
 });
 
 client.on('ready', () => {
-    console.log('Client is ready!');
+    console.log('Cliente do WhatsApp está pronto!');
 });
 
 client.initialize();
 
 async function getSemanal() {
     try {
+        console.log('Executando consulta getSemanal...');
         const query = (`
             WITH dias_da_semana AS (
                 SELECT DISTINCT data_de_manutencao::date AS data
@@ -28,7 +30,7 @@ async function getSemanal() {
             SELECT 
                 machine.numero_de_patrimonio AS numero_de_patrimonio,
                 TO_CHAR(dias_da_semana.data, 'DD/MM/YYYY') AS data,
-                INITCAP(TO_CHAR(dias_da_semana.data, 'FMDay', 'TM')) AS dia_da_semana,
+                TO_CHAR(dias_da_semana.data, 'FMDay') AS dia_da_semana,
                 CASE 
                     WHEN maintenance.data_de_manutencao IS NOT NULL THEN 'Lubrificada'
                     ELSE 'Não Lubrificada'
@@ -42,11 +44,14 @@ async function getSemanal() {
             ON 
                 machine.numero_de_patrimonio = maintenance.numero_de_patrimonioid 
                 AND maintenance.data_de_manutencao = dias_da_semana.data
+            WHERE 
+                maintenance.data_de_manutencao IS NULL
             ORDER BY 
                 dias_da_semana.data, machine.numero_de_patrimonio
         `);
 
         const response = await pool.query(query);
+        console.log('Consulta getSemanal executada com sucesso.');
         return response.rows;
     } catch (error) {
         console.error('Erro ao executar a consulta:', error);
@@ -57,6 +62,7 @@ async function getSemanal() {
 // Função para enviar mensagem para um grupo ou contato
 async function sendMessage(groupNameOrId, message) {
     try {
+        console.log(`Enviando mensagem para ${groupNameOrId}...`);
         const chats = await client.getChats();
         let groupId = null;
 
@@ -80,6 +86,7 @@ async function sendMessage(groupNameOrId, message) {
 
 async function sendWeeklyReport() {
     try {
+        console.log('Iniciando envio do relatório semanal...');
         const manutencoes = await getSemanal();
         let message = 'Relatório de Lubrificações da Semana:\n\n';
 
@@ -90,20 +97,17 @@ async function sendWeeklyReport() {
             message += `Status: ${manutencao.status_lubrificacao}\n\n`;
         });
 
+        console.log('Mensagem montada:', message);
+
         // Substitua 'Nome do Grupo' pelo nome do grupo ou ID do contato
-        await sendMessage('Nome do Grupo', message);
+        await sendMessage(process.env.GROUPID, message);
     } catch (error) {
         console.error('Erro ao enviar o relatório semanal:', error);
     }
 }
 
-// Agendar a tarefa para ser executada toda sexta-feira às 8:00 AM
-cron.schedule('0 8 * * 5', () => {
+// Agendar a tarefa para ser executada a cada minuto (para testes)
+cron.schedule('* * * * *', () => {
     console.log('Executando tarefa agendada para enviar mensagem no WhatsApp...');
     sendWeeklyReport();
 });
-
-module.exports = {
-    client,
-    sendWeeklyReport
-};

@@ -12,15 +12,14 @@ async function getAdmins(req, res) {
 async function compareAdmin(req, res) {
     const { email, senha } = req.body;
     const errors = [];
-    const errorCount = 0;
     console.log('Dados recebidos:', req.body);
     if (!email) {
         errors.push({ message: "Email é obrigatório" });
-        errorCount++;
+
     }
     if (!senha) {
         errors.push({ message: "Senha é obrigatório" });
-        errorCount++;
+
     }
     if (errors.length > 0) {
         return res.status(400).json({ errors });

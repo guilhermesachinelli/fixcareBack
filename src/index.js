@@ -1,4 +1,5 @@
 require('dotenv').config()
+require('./whatsapp.js');
 const cors = require('cors')
 const express = require('express')
 const app = express()
