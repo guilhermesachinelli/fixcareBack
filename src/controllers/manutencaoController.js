@@ -52,6 +52,8 @@ async function getMaintenance(req, res) {
         res.status(500).json(error);
     }
 }
+
+
 async function createMaintenance(req, res) {
     const {
         numero_de_patrimonioID,
@@ -91,9 +93,6 @@ async function createMaintenance(req, res) {
     }
     if (!nome_do_responsavel) {
         return res.status(400).json({ message: 'Nome do responsável é obrigatório' });
-    }
-    if(tipo_de_manutencao !== 'Preventiva' || tipo_de_manutencao !== 'Corretiva' || tipo_de_manutencao !== 'Lubrificação - Diária' || tipo_de_manutencao !== 'Lubrificação - Semanal' || tipo_de_manutencao !== 'Lubrificação - Mensal' || tipo_de_manutencao !== 'Lubrificação - Anual') {
-        return res.status(400).json({ message: 'Tipo de manutenção inválido' });
     }
     if (!data_de_manutencao) {
         return res.status(400).json({ message: 'Data da manutenção é obrigatória' });
@@ -176,4 +175,4 @@ async function updateMaintenance(req, res) {
         res.status(500).send('Erro ao atualizar manutenção: ' + error.message);
     }
 }
-module.exports = { getMaintenances, getMaintenance, createMaintenance, updateMaintenance };
+module.exports = { getMaintenances, getMaintenance,createMaintenance, updateMaintenance };

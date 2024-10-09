@@ -1,7 +1,7 @@
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth } = pkg;
 import qrcode from "qrcode-terminal";
-
+import dotenv from "dotenv";
 const client = new Client({
     authStrategy: new LocalAuth(),
 });
@@ -54,7 +54,7 @@ client.on("ready", async () => {
         console.error("Erro ao obter chats:", err);
     }
     // Exemplo de uso
-    const groupNameOrId = "120363327750555481@g.us"; // Nome do grupo ou ID
+    const groupNameOrId = process.env.GROUPID; // Nome do grupo ou ID
     // const groupNameOrId = "";
     const message =
         "Mensagem TESTE no grupo para projeto Veteranos (npm i whatsapp-web.js)";
