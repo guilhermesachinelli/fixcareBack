@@ -1,7 +1,7 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const cron = require('node-cron');
-//const pool = require('./config/dbConfig.js'); // Certifique-se de que o pool de conexão está configurado corretamente
+const pool = require('./config/dbConfig.js'); // Certifique-se de que o pool de conexão está configurado corretamente
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -22,33 +22,18 @@ async function getSemanal() {
     try {
         console.log('Executando consulta getSemanal...');
         const query = (`
-            WITH dias_da_semana AS (
-                SELECT DISTINCT data_de_manutencao::date AS data
-                FROM maintenance
-                WHERE DATE_PART('dow', data_de_manutencao) BETWEEN 1 AND 5
-            )
-            SELECT 
-                machine.numero_de_patrimonio AS numero_de_patrimonio,
-                TO_CHAR(dias_da_semana.data, 'DD/MM/YYYY') AS data,
-                TO_CHAR(dias_da_semana.data, 'FMDay') AS dia_da_semana,
-                CASE 
-                    WHEN maintenance.data_de_manutencao IS NOT NULL THEN 'Lubrificada'
-                    ELSE 'Não Lubrificada'
-                END AS status_lubrificacao
-            FROM 
-                machine
-            CROSS JOIN 
-                dias_da_semana
-            LEFT JOIN 
-                maintenance 
-            ON 
-                machine.numero_de_patrimonio = maintenance.numero_de_patrimonioid 
-                AND maintenance.data_de_manutencao = dias_da_semana.data
-            WHERE 
-                maintenance.data_de_manutencao IS NULL
-            ORDER BY 
-                dias_da_semana.data, machine.numero_de_patrimonio
-        `);
+            SELECT machine.numero_de_patrimonio, d.date
+            FROM machine
+            CROSS JOIN (
+            SELECT CURRENT_DATE - INTERVAL '1 day' * generate_series(0, 5) AS date
+            ) d 
+            LEFT JOIN maintenance mt
+            ON mt.numero_de_patrimonioID = machine.numero_de_patrimonio
+            AND mt.tipo_de_manutencao = 'Lubrificação'
+            AND mt.data_de_manutencao = d.date
+            WHERE mt.numero_de_patrimonioID IS NULL
+            ORDER BY machine.numero_de_patrimonio, d.date;
+            `);
 
         const response = await pool.query(query);
         console.log('Consulta getSemanal executada com sucesso.');
@@ -84,18 +69,58 @@ async function sendMessage(groupNameOrId, message) {
     }
 }
 
+async function sendDailyMessage() {
+    try {
+        const message = 'Bom dia! Lembre-se de lubrificar as máquinas hoje.';
+
+        console.log('Mensagem montada:', message);
+
+        // Substitua 'Nome do Grupo' pelo nome do grupo ou ID do contato
+        await sendMessage(process.env.GROUPID, message);
+    } catch (error) {
+        console.error('Erro ao enviar a mensagem diária:', error);
+    }
+}
+
+// Função para formatar a mensagem
+// Função para formatar a mensagem
+function formatMessage(data) {
+    const daysOfWeek = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    const unlubricatedMachines = {};
+
+    data.forEach(row => {
+        const patrimonio = row.numero_de_patrimonio;
+        const date = new Date(row.date);
+        const dayOfWeek = daysOfWeek[date.getDay() - 1]; // Ajusta o índice para começar na segunda-feira
+
+        if (!unlubricatedMachines[patrimonio]) {
+            unlubricatedMachines[patrimonio] = [];
+        }
+
+        unlubricatedMachines[patrimonio].push(dayOfWeek);
+    });
+
+    let message = '*Lubrificação:*\n\n'; // Adiciona o título em negrito no início da mensagem
+    for (const patrimonio in unlubricatedMachines) {
+        message += `Número de patrimônio da máquina: ${patrimonio}\n`;
+        message += `Dias que não foram lubrificados na semana:\n`;
+
+        // Ordena os dias da semana na ordem correta
+        const sortedDays = unlubricatedMachines[patrimonio].sort((a, b) => {
+            return daysOfWeek.indexOf(a) - daysOfWeek.indexOf(b);
+        });
+
+        message += sortedDays.join('\n');
+        message += '\n\n';
+    }
+
+    return message.trim(); // Remove espaços em branco extras no final da mensagem
+}
+// Função para enviar o relatório semanal
 async function sendWeeklyReport() {
     try {
-        console.log('Iniciando envio do relatório semanal...');
-        const manutencoes = await getSemanal();
-        let message = 'Relatório de Lubrificações da Semana:\n\n';
-
-        manutencoes.forEach(manutencao => {
-            message += `Máquina: ${manutencao.numero_de_patrimonio}\n`;
-            message += `Data: ${manutencao.data}\n`;
-            message += `Dia da Semana: ${manutencao.dia_da_semana}\n`;
-            message += `Status: ${manutencao.status_lubrificacao}\n\n`;
-        });
+        const data = await getSemanal(); // Substituído por getSemanal
+        const message = formatMessage(data);
 
         console.log('Mensagem montada:', message);
 
@@ -105,9 +130,15 @@ async function sendWeeklyReport() {
         console.error('Erro ao enviar o relatório semanal:', error);
     }
 }
+// Agendar a tarefa diária para ser executada às 8h da manhã
+cron.schedule('* 8 * * *', () => {
+    console.log('Enviando mensagem diária às 8h da manhã...');
+    sendDailyMessage();
+});
 
-// Agendar a tarefa para ser executada a cada minuto (para testes)
-cron.schedule('* * * * *', () => {
-    console.log('Executando tarefa agendada para enviar mensagem no WhatsApp...');
+// Agendar a tarefa semanal para ser executada às 8h da manhã nas sextas-feiras
+cron.schedule('* 8 * * 5', () => {
+    console.log('Enviando relatório semanal às 8h da manhã na sexta-feira...');
     sendWeeklyReport();
 });
+module.exports = { sendMessage};

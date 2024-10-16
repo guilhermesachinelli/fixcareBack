@@ -24,10 +24,8 @@ CREATE TABLE adm (
 
 CREATE TABLE funcionario (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    nif INTEGER NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL,
+    senha VARCHAR(255) NOT NULL
 );
 CREATE TABLE aluno (
     id SERIAL PRIMARY KEY,
@@ -60,6 +58,7 @@ CREATE TABLE maintenance (
 INSERT INTO adm (email, senha) VALUES ('admin', 'admin');
 
 INSERT INTO aluno (email, senha) VALUES ('aluno', 'aluno');
+INSERT INTO funcionario (email, senha) VALUES ('funcionario', 'funcionario');
 
 INSERT INTO machine (
     numero_de_patrimonio,
@@ -77,4 +76,20 @@ INSERT INTO machine (
     '123456789', 
     1, 
     '2023-10-01' 
+);
+
+INSERT INTO maintenance (
+    numero_de_patrimonioID,
+    nome_do_responsavel,
+    tipo_de_manutencao,
+    descricao,
+    data_de_manutencao,
+    status
+) VALUES (
+    12345,
+    'Responsável Exemplo',
+    'Tipo de Manutenção Exemplo',
+    'Descrição Exemplo',
+    '2023-10-01',
+    'Concluído'
 );
