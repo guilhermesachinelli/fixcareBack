@@ -1,23 +1,21 @@
 const e = require('express');
 const pool = require('../config/dbConfig.js');
 const { sendMessage } = require('../whatsapp');
-function formatarDataParaBrasileiro(dataISO) {
+const moment = require('moment-timezone');
+function formatarDataParaBrasileiro(dataISO, fusoHorario = 'America/Sao_Paulo') {
     // Verificar se dataISO é um objeto Date
     if (dataISO instanceof Date) {
         dataISO = dataISO.toISOString();
     }
-
-    // Cortar a parte do 'T' para frente
-    const dataApenas = dataISO.split('T')[0];
-
-    // Criar um objeto Date com a data cortada
-    const data = new Date(dataApenas);
-
+    
+    // Converter a data para o fuso horário especificado
+    const dataNoFusoHorario = moment.tz(dataISO, fusoHorario);
+    
     // Formatar a data no padrão brasileiro
-    const dia = String(data.getDate()).padStart(2, '0');
-    const mes = String(data.getMonth() + 1).padStart(2, '0'); // Janeiro é 0!
-    const ano = data.getFullYear();
-
+    const dia = dataNoFusoHorario.format('DD');
+    const mes = dataNoFusoHorario.format('MM');
+    const ano = dataNoFusoHorario.format('YYYY');
+    
     return `${dia}/${mes}/${ano}`;
 }
 async function getMaintenances(req, res) {

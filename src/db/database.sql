@@ -35,13 +35,13 @@ CREATE TABLE aluno (
 -- Criação da tabela de requisição de manutenção
 CREATE TABLE requestmaintenance (
     id SERIAL PRIMARY KEY,
-    numero_de_serieID VARCHAR(100) NOT NULL,
+    numero_de_patrimonioID VARCHAR(100) NOT NULL,
     nome VARCHAR(255) NOT NULL,
     causa_do_problema VARCHAR(255) NOT NULL,
     descricao VARCHAR(255),
     data_de_solicitacao DATE NOT NULL,
     status BOOLEAN NOT NULL,
-    FOREIGN KEY (numero_de_serieID) REFERENCES machine(numero_de_serie)
+    FOREIGN KEY (numero_de_patrimonioID) REFERENCES machine(numero_de_patrimonio)
 );
 -- Criação da tabela de manutenção
 CREATE TABLE maintenance (

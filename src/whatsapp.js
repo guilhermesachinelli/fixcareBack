@@ -82,7 +82,7 @@ async function sendDailyMessage() {
     }
 }
 
-// Função para formatar a mensagem
+
 // Função para formatar a mensagem
 function formatMessage(data) {
     const daysOfWeek = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -119,7 +119,7 @@ function formatMessage(data) {
 // Função para enviar o relatório semanal
 async function sendWeeklyReport() {
     try {
-        const data = await getSemanal(); // Substituído por getSemanal
+        const data = await getSemanal(); 
         const message = formatMessage(data);
 
         console.log('Mensagem montada:', message);
@@ -130,8 +130,8 @@ async function sendWeeklyReport() {
         console.error('Erro ao enviar o relatório semanal:', error);
     }
 }
-// Agendar a tarefa diária para ser executada às 8h da manhã
-cron.schedule('* 8 * * *', () => {
+
+cron.schedule('0 8 * * *', () => {
     console.log('Enviando mensagem diária às 8h da manhã...');
     sendDailyMessage();
 });
