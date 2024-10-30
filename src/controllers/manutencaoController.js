@@ -51,8 +51,27 @@ async function getMaintenance(req, res) {
         res.status(500).json(error);
     }
 }
+async function getByNumeroDePatrimonioManutencao(req, res) {
+    try {
+        console.log('Executando consulta getByNumeroDePatrimonioManutencao...');
+        const numeroDePatrimonio = req.params.numeroDePatrimonio;
+        const query = 'SELECT * FROM maintenance WHERE numero_de_patrimonioID = $1';
+        const response = await pool.query(query, [numeroDePatrimonio]);
 
+        // Formatar a data no padrão brasileiro para cada linha do resultado
+        const formattedRows = response.rows.map(row => {
+            return {
+                ...row,
+                data_de_manutencao: formatarDataParaBrasileiro(row.data_de_manutencao)
+            };
+        });
 
+        res.status(200).json(formattedRows);
+    } catch (error) {
+        console.error('Erro ao executar a consulta:', error);
+        res.status(500).send('Erro ao executar a consulta');
+    }
+}
 async function createMaintenance(req, res) {
     const {
         numero_de_patrimonioID,
@@ -155,8 +174,6 @@ async function updateMaintenance(req, res) {
             status = $6
         WHERE id = $7
         RETURNING *`;
-
-
     const valuesManutencao = [
         numero_de_patrimonioID,
         nome_do_responsavel,
@@ -196,4 +213,4 @@ async function updateMaintenance(req, res) {
         res.status(500).send('Erro ao atualizar manutenção: ' + error.message);
     }
 }
-module.exports = { getMaintenances, getMaintenance, createMaintenance, updateMaintenance };
+module.exports = { getMaintenances, getMaintenance, getByNumeroDePatrimonioManutencao,createMaintenance, updateMaintenance };

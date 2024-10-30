@@ -52,7 +52,6 @@ async function getByNumeroDePatrimonioReqManutencao(req, res) {
                 data_de_solicitacao: formatarDataParaBrasileiro(row.data_de_solicitacao)
             };
         });
-
         res.status(200).json(formattedRows);
     } catch (error) {
         console.error('Erro ao executar a consulta:', error);

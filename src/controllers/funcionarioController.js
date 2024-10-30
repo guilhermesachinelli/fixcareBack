@@ -37,5 +37,15 @@ async function compareFuncionario(req, res) {
         res.status(500).json({ error: "Erro ao comparar funcionário" });
     }
 }
-
-module.exports = { getFuncionarios, compareFuncionario };
+async function createFuncionario(req, res) {
+    const { email, senha } = req.body;
+    console.log('Dados recebidos:', req.body);
+    try {
+        const response = await pool.query('INSERT INTO funcionario (email, senha) VALUES ($1, $2)', [email, senha]);
+        res.status(201).json({ message: 'Funcionário criado com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao criar funcionário:', error);
+        res.status(500).json({ error: 'Erro ao criar funcionário' });
+    }
+}
+module.exports = { getFuncionarios,compareFuncionario,createFuncionario };

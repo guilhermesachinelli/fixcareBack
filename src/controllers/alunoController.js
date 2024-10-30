@@ -34,4 +34,15 @@ async function compareAluno(req, res){
         res.status(500).json({error: "Erro ao comparar aluno"});
     }
 }
-module.exports = {getAlunos, compareAluno};
+async function createAluno(req, res){
+    const {email, senha} = req.body;
+    console.log('Dados recebidos:', req.body);
+    try{
+        const response = await pool.query('INSERT INTO aluno (email, senha) VALUES ($1, $2)', [email, senha]);
+        res.status(201).json({message: 'Aluno criado com sucesso!'});
+    }catch(error){
+        console.error('Erro ao criar aluno:', error);
+        res.status(500).json({error: 'Erro ao criar aluno'});
+    }
+}
+module.exports = {getAlunos, compareAluno, createAluno};
