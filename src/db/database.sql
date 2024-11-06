@@ -13,7 +13,7 @@ CREATE TABLE machine (
     numero_de_patrimonio VARCHAR(255) NOT NULL UNIQUE,
     numero_de_serie VARCHAR(255) NOT NULL UNIQUE,
     numero_do_torno INTEGER NOT NULL UNIQUE,
-    data_de_aquisicao DATE NOT NULL,
+    data_de_aquisicao DATE NOT NULL
 );
 -- Criação da tabela de administradores
 CREATE TABLE adm (

@@ -1,24 +1,30 @@
-const e = require('express');
 const ExcelJS = require('exceljs');
-const pool = require('../config/dbConfig'); // Ajuste o caminho conforme necessário
+const pool = require('../config/dbConfig.js');// Ajuste o caminho conforme necessário
 
-async function gerarRelatorioExcel(nomeTabela, colunas) {
+async function gerarRelatorioExcel(nomeTabela, colunas, numeroDePatrimonio = null) {
     try {
-        const result = await pool.query(`SELECT * FROM ${nomeTabela} ORDER BY numero_de_patrimonio`);
+        let query = `SELECT * FROM ${nomeTabela}`;
+        if (numeroDePatrimonio) {
+            query += ` WHERE numero_de_patrimonioID = $1 ORDER BY numero_de_patrimonioID`;
+        } else {
+            query += ` ORDER BY numero_de_patrimonioID`;
+        }
+
+        const result = numeroDePatrimonio 
+            ? await pool.query(query, [numeroDePatrimonio])
+            : await pool.query(query);
+        
         const dados = result.rows;
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Relatório');
 
-        // Defina as colunas com os cabeçalhos corretos
         worksheet.columns = colunas;
 
-        // Adiciona os dados à planilha
         dados.forEach(dado => {
             worksheet.addRow(dado);
         });
 
-        // Gera o arquivo Excel
         const caminhoArquivo = `relatorio_${nomeTabela}.xlsx`;
         await workbook.xlsx.writeFile(caminhoArquivo);
         return caminhoArquivo;
@@ -85,4 +91,5 @@ async function gerarRelatorioRequestMaintenance(req, res) {
         res.status(500).send(erro.message);
     }
 }
+
 module.exports = { gerarRelatorioMachine, gerarRelatorioMaintenance, gerarRelatorioRequestMaintenance };
