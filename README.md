@@ -68,12 +68,48 @@ Tabela maintenance:
 | data_da_manutenção        | date   | Data que foi feita a manutenção
 | status         | boolean   | Status que define se a manutenção ja foi feita ou não
 
-## Boas práticas em nosso código:
+## Rotas da API
 
-Clean code: Estruturação de pastas organizada, dentação de código, versionamento de branchs.
+### Funcionários
+* **GET /funcionario:** Retorna todos os funcionários.
+* **POST /funcionario:** Autentica um funcionário.
+* **POST /funcionario/create:** Cria um novo funcionário.
 
-Componentização: Utilizada nos elementos: Cards, Footer, Header, Navegação por imagem, PopUp.
+### Alunos
+* **GET /aluno:** Retorna todos os alunos.
+* **POST /aluno:** Autentica um aluno.
+* **POST /aluno/create:** Cria um novo aluno.
 
+### Administradores
+* **GET /admin:** Retorna todos os administradores.
+* **POST /admin:** Autentica um administrador.
+
+### Máquinas
+* **GET /machine:** Retorna todas as máquinas.
+* **GET /machine/:id:** Retorna uma máquina por ID.
+* **GET /machine/patrimonio/:numeroDePatrimonio:** Retorna uma máquina por número de patrimônio.
+* **POST /machine:** Cria uma nova máquina.
+* **PUT /machine/:id:** Atualiza uma máquina.
+* **DELETE /machine/:id:** Deleta uma máquina.
+
+### Manutenções
+* **GET /manutencao:** Retorna todas as manutenções.
+* **GET /manutencao/:id:** Retorna uma manutenção por ID.
+* **GET /manutencao/patrimonio/:numeroDePatrimonio:** Retorna manutenções por número de patrimônio da máquina.
+* **POST /manutencao:** Cria uma nova manutenção.
+* **PUT /manutencao/:id:** Atualiza uma manutenção.
+
+### Solicitações de Manutenção
+* **GET /requestmaintenance:** Retorna todas as solicitações de manutenção.
+* **GET /requestmaintenance/:id:** Retorna uma solicitação de manutenção por ID.
+* **GET /requestmaintenance/patrimonio/:numeroDePatrimonio:** Retorna solicitações de manutenção por número de patrimônio.
+* **POST /requestmaintenance:** Cria uma nova solicitação de manutenção.
+* **PUT /requestmaintenance/:id:** Atualiza o status de uma solicitação de manutenção.
+
+### Relatórios
+* **GET /relatorio-excel-machine/:numero_de_patrimonio?:** Gera um relatório em Excel da tabela Machine.
+* **GET /relatorio-excel-maintenance/:numero_de_patrimonio?:** Gera um relatório em Excel da tabela Maintenance.
+* **GET /relatorio-excel-requestmaintenance/:numero_de_patrimonio?:** Gera um relatório em Excel da tabela requestMaintenance.
 
 # Equipe
 

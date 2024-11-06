@@ -10,7 +10,7 @@ const manutencaoRoutes = require('./routes/manutencaoRoutes')
 const alunoRoutes = require('./routes/alunoRoutes')
 const funcionarioRoutes = require('./routes/funcionarioRoutes')
 const osmanutencaoRoutes = require('./routes/osmanutencaoRoutes.js')
-const geradorExcelRoutes = require('./routes/geradorExecelRoutes')
+const geradorExcelRoutes = require('./routes/geradorExcelRoutes.js')
 app.use(cors())
 app.use(express.json())
 app.use('/', maquinasRoutes);
